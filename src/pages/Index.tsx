@@ -5,7 +5,7 @@ import { MessageInput } from "@/components/MessageInput";
 import { NewChatDialog } from "@/components/NewChatDialog";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChatAPI, Chat, Conversation } from "@/lib/api";
+import { ChatAPI, Chat, Conversation, Source } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
@@ -109,15 +109,45 @@ const Index = () => {
       return;
     }
 
+    // Check if conversation limit reached
+    if (conversations.length >= 10) {
+      toast({
+        title: "Conversation Limit Reached",
+        description: "This chat has reached the maximum of 10 conversations. Please start a new chat to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Show user query immediately with placeholder response
+    const tempConversation: Conversation = {
+      id: Date.now(),
+      chat_id: selectedChatId,
+      user_query: message,
+      bot_response: "",
+      conversation_order: conversations.length + 1,
+      created_at: new Date().toISOString(),
+      sources: [],
+    };
+    
+    setConversations([...conversations, tempConversation]);
+    setSending(true);
+
     try {
-      setSending(true);
       const conversation = await api.sendMessage(selectedChatId, message);
-      setConversations([...conversations, conversation]);
+      // Replace temp conversation with actual response
+      setConversations(prev => {
+        const newConvs = [...prev];
+        newConvs[newConvs.length - 1] = conversation;
+        return newConvs;
+      });
       
       setTimeout(() => {
         scrollRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100);
     } catch (error) {
+      // Remove temp conversation on error
+      setConversations(prev => prev.slice(0, -1));
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to send message",
@@ -165,33 +195,41 @@ const Index = () => {
                       <WelcomeScreen onSendMessage={handleSendMessage} disabled={sending} />
                     ) : (
                       <>
-                        {conversations.map((conv) => (
-                          <ChatResponse
-                            key={conv.id}
-                            userQuery={conv.user_query}
-                            botResponse={conv.bot_response}
-                            sources={[]}
-                          />
+                        {conversations.map((conv, index) => (
+                          <div key={conv.id}>
+                            <ChatResponse
+                              userQuery={conv.user_query}
+                              botResponse={conv.bot_response}
+                              sources={conv.sources || []}
+                            />
+                            {/* Show thinking indicator only for the last message while sending */}
+                            {index === conversations.length - 1 && sending && !conv.bot_response && (
+                              <div className="bg-muted/30 px-6 py-8">
+                                <div className="flex gap-4">
+                                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent">
+                                    <Loader2 className="h-5 w-5 animate-spin text-white" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <p className="text-muted-foreground">Thinking...</p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         ))}
 
-                        {sending && (
-                          <div className="flex gap-4 px-6 py-8">
-                            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent">
-                              <Loader2 className="h-5 w-5 animate-spin text-white" />
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-muted-foreground">Thinking...</p>
-                            </div>
-                          </div>
-                        )}
-                        
                         <div ref={scrollRef} />
                       </>
                     )}
                   </div>
                 </ScrollArea>
 
-                {conversations.length > 0 && <MessageInput onSend={handleSendMessage} disabled={sending} />}
+                {conversations.length > 0 && (
+                  <MessageInput 
+                    onSend={handleSendMessage} 
+                    disabled={sending || conversations.length >= 10} 
+                  />
+                )}
               </>
             )}
           </>

@@ -7,6 +7,12 @@ export interface Chat {
   updated_at: string;
 }
 
+export interface Source {
+  title: string;
+  url: string;
+  snippet?: string;
+}
+
 export interface Conversation {
   id: number;
   chat_id: number;
@@ -14,6 +20,7 @@ export interface Conversation {
   bot_response: string;
   conversation_order: number;
   created_at: string;
+  sources?: Source[];
 }
 
 export interface ChatDetail extends Chat {

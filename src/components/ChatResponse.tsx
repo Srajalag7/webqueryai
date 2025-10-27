@@ -3,6 +3,8 @@ import { Bot, User, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SourcesDisplay } from "./SourcesDisplay";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface Source {
   title: string;
@@ -58,10 +60,10 @@ export function ChatResponse({ userQuery, botResponse, sources }: ChatResponsePr
               </TabsList>
 
               <TabsContent value="answer" className="mt-0 pb-6">
-                <div className="space-y-4">
-                  <p className="whitespace-pre-wrap break-words leading-7 text-foreground">
+                <div className="prose">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {botResponse}
-                  </p>
+                  </ReactMarkdown>
                 </div>
               </TabsContent>
 

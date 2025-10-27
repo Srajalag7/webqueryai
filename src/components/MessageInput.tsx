@@ -35,7 +35,7 @@ export function MessageInput({ onSend, disabled }: MessageInputProps) {
           onKeyDown={handleKeyDown}
           placeholder="Ask a follow-up..."
           disabled={disabled}
-          className="min-h-[60px] resize-none bg-background"
+          className="min-h-[60px] resize-none bg-background focus-visible:ring-1 focus-visible:ring-primary"
           rows={1}
         />
         <Button
