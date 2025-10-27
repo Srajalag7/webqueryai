@@ -33,7 +33,7 @@ export function MessageInput({ onSend, disabled }: MessageInputProps) {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Send a message..."
+          placeholder="Ask a follow-up..."
           disabled={disabled}
           className="min-h-[60px] resize-none bg-background"
           rows={1}
@@ -47,9 +47,6 @@ export function MessageInput({ onSend, disabled }: MessageInputProps) {
           <Send className="h-4 w-4" />
         </Button>
       </div>
-      <p className="mx-auto mt-2 max-w-3xl text-center text-xs text-muted-foreground">
-        Press Enter to send, Shift+Enter for new line
-      </p>
     </form>
   );
 }

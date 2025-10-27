@@ -1,13 +1,4 @@
-const STORAGE_KEY = "chatbot_base_url";
-const DEFAULT_BASE_URL = "http://localhost:8000";
-
-export function getBaseUrl(): string {
-  return localStorage.getItem(STORAGE_KEY) || DEFAULT_BASE_URL;
-}
-
-export function setBaseUrl(url: string): void {
-  localStorage.setItem(STORAGE_KEY, url);
-}
+const BASE_URL = "https://rag-chatbot-y9rx.onrender.com";
 
 export interface Chat {
   id: number;
@@ -41,8 +32,8 @@ export interface ChatsResponse {
 export class ChatAPI {
   private baseURL: string;
 
-  constructor(baseURL?: string) {
-    this.baseURL = baseURL || getBaseUrl();
+  constructor() {
+    this.baseURL = BASE_URL;
   }
 
   async createChat(title: string): Promise<Chat> {
