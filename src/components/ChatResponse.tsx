@@ -6,16 +6,10 @@ import { SourcesDisplay } from "./SourcesDisplay";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-interface Source {
-  title: string;
-  url: string;
-  snippet?: string;
-}
-
 interface ChatResponseProps {
   userQuery: string;
   botResponse: string;
-  sources?: Source[];
+  sources?: string[];
 }
 
 export function ChatResponse({ userQuery, botResponse, sources }: ChatResponseProps) {

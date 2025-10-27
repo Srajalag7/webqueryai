@@ -5,7 +5,7 @@ import { MessageInput } from "@/components/MessageInput";
 import { NewChatDialog } from "@/components/NewChatDialog";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChatAPI, Chat, Conversation, Source } from "@/lib/api";
+import { ChatAPI, Chat, Conversation } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
