@@ -224,11 +224,19 @@ const Index = () => {
                   </div>
                 </ScrollArea>
 
-                {conversations.length > 0 && (
+                {conversations.length > 0 && conversations.length < 10 && (
                   <MessageInput 
                     onSend={handleSendMessage} 
-                    disabled={sending || conversations.length >= 10} 
+                    disabled={sending} 
                   />
+                )}
+                
+                {conversations.length >= 10 && (
+                  <div className="border-t border-border bg-card p-6 text-center">
+                    <p className="text-muted-foreground">
+                      This conversation is getting longer. Please start a new chat to continue.
+                    </p>
+                  </div>
                 )}
               </>
             )}

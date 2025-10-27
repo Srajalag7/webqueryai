@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Send, Search } from "lucide-react";
+import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -44,22 +44,12 @@ export function WelcomeScreen({ onSendMessage, disabled }: WelcomeScreenProps) {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask anything. Type @ for mentions."
+              placeholder="Ask anything..."
               disabled={disabled}
               className="min-h-[80px] resize-none border-0 bg-transparent text-base focus-visible:ring-0"
               rows={3}
             />
-            <div className="flex items-center justify-between pt-2">
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                >
-                  <Search className="h-4 w-4" />
-                </Button>
-              </div>
+            <div className="flex items-center justify-end pt-2">
               <Button
                 type="submit"
                 disabled={!message.trim() || disabled}
