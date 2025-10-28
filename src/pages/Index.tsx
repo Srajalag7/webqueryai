@@ -143,10 +143,6 @@ const Index = () => {
         newConvs[newConvs.length - 1] = conversation;
         return newConvs;
       });
-      
-      setTimeout(() => {
-        scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
     } catch (error) {
       // Remove temp conversation on error
       setConversations(prev => prev.slice(0, -1));
