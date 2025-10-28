@@ -7,7 +7,7 @@ import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatAPI, Chat, Conversation } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, User } from "lucide-react";
 
 const Index = () => {
   const [chats, setChats] = useState<Chat[]>([]);
@@ -209,23 +209,40 @@ const Index = () => {
                       <>
                         {conversations.map((conv, index) => (
                           <div key={conv.id}>
-                            <ChatResponse
-                              userQuery={conv.user_query}
-                              botResponse={conv.bot_response}
-                              sources={conv.sources || []}
-                            />
-                            {/* Show thinking indicator only for the last message while sending */}
-                            {index === conversations.length - 1 && sending && !conv.bot_response && (
-                              <div className="bg-muted/30 px-6 py-8">
-                                <div className="flex gap-4">
-                                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent">
-                                    <Loader2 className="h-5 w-5 animate-spin text-white" />
-                                  </div>
-                                  <div className="flex-1">
-                                    <p className="text-muted-foreground">Thinking...</p>
+                            {conv.bot_response ? (
+                              <ChatResponse
+                                userQuery={conv.user_query}
+                                botResponse={conv.bot_response}
+                                sources={conv.sources || []}
+                              />
+                            ) : (
+                              <>
+                                {/* User Query */}
+                                <div className="space-y-6 py-6">
+                                  <div className="flex gap-4 px-6">
+                                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                                      <User className="h-5 w-5" />
+                                    </div>
+                                    <div className="flex-1 space-y-2">
+                                      <p className="whitespace-pre-wrap break-words leading-7 text-foreground">
+                                        {conv.user_query}
+                                      </p>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
+
+                                {/* Thinking indicator */}
+                                <div className="bg-muted/30 px-6 py-8">
+                                  <div className="flex gap-4">
+                                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent">
+                                      <Loader2 className="h-5 w-5 animate-spin text-white" />
+                                    </div>
+                                    <div className="flex-1">
+                                      <p className="text-muted-foreground">Thinking...</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </>
                             )}
                           </div>
                         ))}
