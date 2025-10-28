@@ -17,6 +17,7 @@ const Index = () => {
   const [chatLoading, setChatLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [newChatDialogOpen, setNewChatDialogOpen] = useState(false);
+  const [pendingMessage, setPendingMessage] = useState<string | null>(null);
   const { toast } = useToast();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -65,6 +66,16 @@ const Index = () => {
         title: "Success",
         description: "New chat created",
       });
+      
+      // If there's a pending message from welcome screen, send it
+      if (pendingMessage) {
+        const messageToSend = pendingMessage;
+        setPendingMessage(null);
+        // Use setTimeout to ensure the chat is fully set up before sending
+        setTimeout(() => {
+          handleSendMessageDirectly(newChat.id, messageToSend);
+        }, 100);
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -99,16 +110,7 @@ const Index = () => {
     }
   };
 
-  const handleSendMessage = async (message: string) => {
-    if (!selectedChatId) {
-      toast({
-        title: "Error",
-        description: "Please select or create a chat first",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const handleSendMessageDirectly = async (chatId: number, message: string) => {
     // Check if conversation limit reached
     if (conversations.length >= 10) {
       toast({
@@ -122,7 +124,7 @@ const Index = () => {
     // Show user query immediately with placeholder response
     const tempConversation: Conversation = {
       id: Date.now(),
-      chat_id: selectedChatId,
+      chat_id: chatId,
       user_query: message,
       bot_response: "",
       conversation_order: conversations.length + 1,
@@ -134,7 +136,7 @@ const Index = () => {
     setSending(true);
 
     try {
-      const conversation = await api.sendMessage(selectedChatId, message);
+      const conversation = await api.sendMessage(chatId, message);
       // Replace temp conversation with actual response
       setConversations(prev => {
         const newConvs = [...prev];
@@ -158,8 +160,22 @@ const Index = () => {
     }
   };
 
+  const handleSendMessage = async (message: string) => {
+    if (!selectedChatId) {
+      toast({
+        title: "Error",
+        description: "Please select or create a chat first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    handleSendMessageDirectly(selectedChatId, message);
+  };
+
   const handleWelcomeSend = async (message: string) => {
     if (!selectedChatId) {
+      setPendingMessage(message);
       setNewChatDialogOpen(true);
       return;
     }
