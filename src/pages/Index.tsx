@@ -17,7 +17,6 @@ const Index = () => {
   const [chatLoading, setChatLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [newChatDialogOpen, setNewChatDialogOpen] = useState(false);
-  const [pendingMessage, setPendingMessage] = useState<string | null>(null);
   const { toast } = useToast();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -66,23 +65,12 @@ const Index = () => {
         title: "Success",
         description: "New chat created",
       });
-      
-      // If there's a pending message, send it after chat is created
-      if (pendingMessage) {
-        const messageToSend = pendingMessage;
-        setPendingMessage(null);
-        // Small delay to ensure state is updated
-        setTimeout(() => {
-          handleSendMessage(messageToSend);
-        }, 100);
-      }
     } catch (error) {
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to create chat",
         variant: "destructive",
       });
-      setPendingMessage(null);
     }
   };
 
@@ -131,16 +119,35 @@ const Index = () => {
       return;
     }
 
+    // Show user query immediately with placeholder response
+    const tempConversation: Conversation = {
+      id: Date.now(),
+      chat_id: selectedChatId,
+      user_query: message,
+      bot_response: "",
+      conversation_order: conversations.length + 1,
+      created_at: new Date().toISOString(),
+      sources: [],
+    };
+    
+    setConversations([...conversations, tempConversation]);
     setSending(true);
 
     try {
       const conversation = await api.sendMessage(selectedChatId, message);
-      setConversations(prev => [...prev, conversation]);
+      // Replace temp conversation with actual response
+      setConversations(prev => {
+        const newConvs = [...prev];
+        newConvs[newConvs.length - 1] = conversation;
+        return newConvs;
+      });
       
       setTimeout(() => {
         scrollRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100);
     } catch (error) {
+      // Remove temp conversation on error
+      setConversations(prev => prev.slice(0, -1));
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to send message",
@@ -153,7 +160,6 @@ const Index = () => {
 
   const handleWelcomeSend = async (message: string) => {
     if (!selectedChatId) {
-      setPendingMessage(message);
       setNewChatDialogOpen(true);
       return;
     }
@@ -189,29 +195,28 @@ const Index = () => {
                       <WelcomeScreen onSendMessage={handleSendMessage} disabled={sending} />
                     ) : (
                       <>
-                        {conversations.map((conv) => (
+                        {conversations.map((conv, index) => (
                           <div key={conv.id}>
                             <ChatResponse
                               userQuery={conv.user_query}
                               botResponse={conv.bot_response}
                               sources={conv.sources || []}
                             />
+                            {/* Show thinking indicator only for the last message while sending */}
+                            {index === conversations.length - 1 && sending && !conv.bot_response && (
+                              <div className="bg-muted/30 px-6 py-8">
+                                <div className="flex gap-4">
+                                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent">
+                                    <Loader2 className="h-5 w-5 animate-spin text-white" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <p className="text-muted-foreground">Thinking...</p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         ))}
-
-                        {/* Show thinking indicator while sending */}
-                        {sending && (
-                          <div className="bg-muted/30 px-6 py-8">
-                            <div className="flex gap-4">
-                              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent">
-                                <Loader2 className="h-5 w-5 animate-spin text-white" />
-                              </div>
-                              <div className="flex-1">
-                                <p className="text-muted-foreground">Thinking...</p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
 
                         <div ref={scrollRef} />
                       </>
